@@ -2,8 +2,49 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+    --color-ink-50: #F3F6FB;
+    --color-ink-100: #E3EAF5;
+    --color-ink-200: #D5E0F0;
+    --color-ink-500: #5A6F92;
+    --color-ink-600: #3C5379;
+    --color-ink-800: #12356F;
+    --color-ink-900: #0B2A5B;
+
+    --color-brand-100: #EAF3FF;
+    --color-brand-500: #1A8CFF;
+    --color-brand-600: #0B6BDB;
+
+    --color-magenta-100: #FFE3F1;
+    --color-magenta-500: #EC0E80;
+    --color-magenta-600: #D6086F;
+
+    --color-sun-400: #FFD500;
+}
+
+@layer components {
+    .label {
+        @apply mb-2 block text-sm font-bold text-ink-900;
+    }
+
+    .input {
+        @apply block w-full rounded-xl border-2 border-ink-200 bg-white px-4 py-3 text-sm text-ink-900 placeholder:text-ink-500 focus:border-brand-600 focus:outline-none;
+    }
+
+    .error-text {
+        @apply mt-1.5 text-sm font-semibold text-magenta-600;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-ink-900;
+    }
+
+    .btn-outline {
+        @apply inline-flex items-center justify-center rounded-xl border-2 border-ink-200 bg-white px-4 py-2 text-sm font-bold text-ink-900 transition hover:border-ink-900;
+    }
 }
