@@ -14,15 +14,15 @@
 
 <header class="border-b border-ink-100 bg-white">
     <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-3 lg:px-12">
-        <a href="{{ route('customer.dashboard') }}" aria-label="TintaKita Online">
+        <a href="{{ route('home') }}" aria-label="TintaKita Online">
             <img src="{{ asset('images/logo.png') }}" alt="TintaKita Online" class="h-12 w-auto">
         </a>
 
         <nav class="flex flex-wrap gap-8 text-sm font-semibold">
             <a href="{{ route('customer.dashboard') }}" @class(['hover:text-brand-600', 'text-brand-600' => request()->routeIs('customer.dashboard')])>Beranda</a>
-            <a href="#" class="hover:text-brand-600">Katalog</a>
-            <a href="#" class="hover:text-brand-600">Pesanan Saya</a>
-            <a href="#" class="hover:text-brand-600">Keranjang</a>
+            <a href="{{ route('catalog') }}" class="hover:text-brand-600">Katalog</a>
+            <a href="{{ route('orders.index') }}" @class(['hover:text-brand-600', 'text-brand-600' => request()->routeIs('orders.*', 'checkout.*')])>Pesanan Saya</a>
+            <a href="{{ route('cart.index') }}" @class(['hover:text-brand-600', 'text-brand-600' => request()->routeIs('cart.*')])>Keranjang ({{ \App\Support\Cart::count() }})</a>
         </nav>
 
         <div class="flex items-center gap-3">
@@ -37,6 +37,14 @@
 </header>
 
 <main class="mx-auto max-w-7xl px-6 py-10 lg:px-12">
+    @if (session('success'))
+        <div class="mb-6 rounded-xl bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-800 ring-1 ring-emerald-200">{{ session('success') }}</div>
+    @endif
+
+    @if (session('error'))
+        <div class="mb-6 rounded-xl bg-rose-50 px-5 py-3 text-sm font-bold text-rose-800 ring-1 ring-rose-200">{{ session('error') }}</div>
+    @endif
+    
     {{ $slot }}
 </main>
 

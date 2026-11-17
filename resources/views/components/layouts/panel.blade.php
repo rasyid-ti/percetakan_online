@@ -11,8 +11,8 @@
     $menus = [
         'admin' => [
             ['Dashboard', 'admin.dashboard', $iconDashboard],
-            ['Pesanan', null, $iconOrders],
-            ['Pembayaran', null, $iconPayment],
+            ['Pesanan', 'admin.orders.index', $iconOrders],
+            ['Pembayaran', 'admin.payments', $iconPayment],
             ['Produk & Kategori', null, $iconBox],
             ['Pengguna', null, $iconUsers],
         ],
@@ -52,7 +52,7 @@
 
         <nav class="flex flex-col gap-1.5">
             @foreach ($items as [$label, $route, $icon])
-                @php $active = $route && request()->routeIs($route); @endphp
+                @php $active = $route && (request()->routeIs($route) || ($route === 'admin.orders.index' && request()->routeIs('admin.orders.*'))); @endphp
                 <a href="{{ $route ? route($route) : '#' }}" @class([
                     'flex items-center gap-3.5 rounded-2xl px-3.5 py-3 text-[15px]',
                     'bg-white font-bold text-ink-900' => $active,
@@ -82,6 +82,13 @@
     </aside>
 
     <main class="min-w-0 flex-1 p-6 lg:p-10">
+        @if (session('success'))
+            <div class="mb-6 rounded-xl bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-800 ring-1 ring-emerald-200">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="mb-6 rounded-xl bg-rose-50 px-5 py-3 text-sm font-bold text-rose-800 ring-1 ring-rose-200">{{ session('error') }}</div>
+        @endif
+
         {{ $slot }}
     </main>
 </div>

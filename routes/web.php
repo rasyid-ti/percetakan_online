@@ -1,14 +1,20 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
-Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route(auth()->user()->role->dashboardRoute())
-        : redirect()->route('login');
-})->name('home');
+// Halaman publik
+Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/katalog', [PageController::class, 'catalog'])->name('catalog');
+Route::get('/produk/{product:slug}', [PageController::class, 'product'])->name('product.show');
 
+// Autentikasi
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/masuk', [AuthController::class, 'login']);
@@ -20,24 +26,58 @@ Route::post('/keluar', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-Route::middleware(['auth', 'role:customer'])
-    ->prefix('pelanggan')->name('customer.')
-    ->group(function () {
+// Pelanggan
+Route::middleware(['auth', 'role:customer'])->group(function () {
+    Route::prefix('pelanggan')->name('customer.')->group(function () {
         Route::view('/dashboard', 'customer.dashboard')->name('dashboard');
     });
 
+    Route::prefix('keranjang')->name('cart.')->group(function () {
+        Route::get('/', [CartController::class, 'index'])->name('index');
+        Route::post('/tambah/{product:slug}', [CartController::class, 'store'])->name('store');
+        Route::delete('/{key}', [CartController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+    Route::prefix('pesanan')->name('orders.')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/{order:code}', [OrderController::class, 'show'])->name('show');
+        Route::post('/{order:code}/bayar', [OrderController::class, 'pay'])->name('pay');
+        Route::post('/{order:code}/batal', [OrderController::class, 'cancel'])->name('cancel');
+        Route::get('/{order:code}/bukti', [OrderController::class, 'proof'])->name('proof');
+        Route::get('/{order:code}/desain/{item}', [OrderController::class, 'design'])->name('design');
+    });
+});
+
+// Admin
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')->name('admin.')
     ->group(function () {
-        Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+        Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+
+        Route::get('/pesanan', [AdminOrderController::class, 'index'])->name('orders.index')->defaults('mode', 'orders');
+        Route::get('/pembayaran', [AdminOrderController::class, 'index'])->name('payments')->defaults('mode', 'payments');
+
+        Route::get('/pesanan/{order:code}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::post('/pesanan/{order:code}/pembayaran/{payment}/setujui', [AdminOrderController::class, 'approve'])->name('orders.approve');
+        Route::post('/pesanan/{order:code}/pembayaran/{payment}/tolak', [AdminOrderController::class, 'reject'])->name('orders.reject');
+        Route::post('/pesanan/{order:code}/operator', [AdminOrderController::class, 'assign'])->name('orders.assign');
+        Route::post('/pesanan/{order:code}/selesai', [AdminOrderController::class, 'complete'])->name('orders.complete');
+        Route::post('/pesanan/{order:code}/batal', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
+        Route::get('/pesanan/{order:code}/desain/{item}', [AdminOrderController::class, 'design'])->name('orders.design');
+        Route::get('/pembayaran/{payment}/bukti', [AdminOrderController::class, 'proof'])->name('payments.proof');
     });
 
+// Operator
 Route::middleware(['auth', 'role:operator'])
     ->prefix('operator')->name('operator.')
     ->group(function () {
         Route::view('/dashboard', 'operator.dashboard')->name('dashboard');
     });
 
+// Owner
 Route::middleware(['auth', 'role:owner'])
     ->prefix('owner')->name('owner.')
     ->group(function () {
