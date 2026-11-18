@@ -13,19 +13,17 @@
             ['Dashboard', 'admin.dashboard', $iconDashboard],
             ['Pesanan', 'admin.orders.index', $iconOrders],
             ['Pembayaran', 'admin.payments', $iconPayment],
-            ['Produk & Kategori', null, $iconBox],
-            ['Pengguna', null, $iconUsers],
+            ['Produk & Kategori', 'admin.products.index', $iconBox],
+            ['Pengguna', 'admin.users.index', $iconUsers],
         ],
         'operator' => [
             ['Antrean Produksi', 'operator.dashboard', 'M4 4h6v16H4zM14 4h6v10h-6z'],
-            ['Riwayat Tugas', null, 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2'],
+            ['Riwayat Tugas', 'operator.history', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2'],
             ['Profil', null, $iconUsers],
         ],
         'owner' => [
             ['Ringkasan', 'owner.dashboard', $iconDashboard],
-            ['Laporan Penjualan', null, 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
-            ['Produk', null, $iconBox],
-            ['Tim & Pengguna', null, $iconUsers],
+            ['Laporan Penjualan', 'owner.report', 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
         ],
     ];
 
@@ -52,7 +50,14 @@
 
         <nav class="flex flex-col gap-1.5">
             @foreach ($items as [$label, $route, $icon])
-                @php $active = $route && (request()->routeIs($route) || ($route === 'admin.orders.index' && request()->routeIs('admin.orders.*'))); @endphp
+                @php
+                    $active = $route && (
+                        request()->routeIs($route)
+                        || ($route === 'admin.orders.index' && request()->routeIs('admin.orders.*'))
+                        || ($route === 'admin.products.index' && request()->routeIs('admin.products.*', 'admin.categories.*'))
+                        || ($route === 'admin.users.index' && request()->routeIs('admin.users.*'))
+                    );
+                @endphp
                 <a href="{{ $route ? route($route) : '#' }}" @class([
                     'flex items-center gap-3.5 rounded-2xl px-3.5 py-3 text-[15px]',
                     'bg-white font-bold text-ink-900' => $active,

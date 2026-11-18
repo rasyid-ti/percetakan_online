@@ -13,7 +13,7 @@
                 @foreach ($lines as $line)
                     <div class="flex flex-wrap items-center gap-5 rounded-3xl border border-ink-100 bg-white p-5">
                         <div class="h-24 w-32 shrink-0 overflow-hidden rounded-2xl">
-                            <x-product-art class="h-full" />
+                            <x-product-art :compact="true" :src="$line['product']->image_url" />
                         </div>
                         <div class="min-w-[200px] flex-1">
                             <a href="{{ route('product.show', $line['product']->slug) }}" class="text-lg font-extrabold hover:text-brand-600">{{ $line['product']->name }}</a>

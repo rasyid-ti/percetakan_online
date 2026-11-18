@@ -12,7 +12,7 @@
             {{-- Kiri --}}
             <div class="space-y-5">
                 <div class="relative overflow-hidden rounded-[28px]">
-                    <x-product-art :tall="true" />
+                    <x-product-art :tall="true" :src="$product->image_url" />
                     <span class="absolute left-5 top-5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold">Pratinjau ilustrasi</span>
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-sm">

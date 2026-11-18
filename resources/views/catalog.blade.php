@@ -39,7 +39,7 @@
             <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ($products as $product)
                     <a href="{{ route('product.show', $product->slug) }}" class="flex flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white transition hover:-translate-y-1 hover:border-brand-500">
-                        <x-product-art />
+                        <x-product-art :src="$product->image_url" />
                         <div class="flex flex-1 flex-col gap-2.5 p-5">
                             <span class="w-fit rounded-full bg-magenta-100 px-2.5 py-1 text-xs font-bold text-magenta-600">{{ $product->category->name }}</span>
                             <span class="text-lg font-extrabold">{{ $product->name }}</span>

@@ -8,6 +8,12 @@ use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Operator\TaskController as OperatorTaskController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
+use App\Http\Controllers\Owner\ReportController as OwnerReportController;
 
 // Halaman publik
 Route::get('/', [PageController::class, 'home'])->name('home');
@@ -68,18 +74,49 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/pesanan/{order:code}/batal', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('/pesanan/{order:code}/desain/{item}', [AdminOrderController::class, 'design'])->name('orders.design');
         Route::get('/pembayaran/{payment}/bukti', [AdminOrderController::class, 'proof'])->name('payments.proof');
+
+        Route::resource('produk', AdminProductController::class)
+            ->parameters(['produk' => 'product'])
+            ->names('products')
+            ->except('show');
+        Route::post('/produk/{product}/aktif', [AdminProductController::class, 'toggle'])->name('products.toggle');
+
+        Route::resource('kategori', AdminCategoryController::class)
+            ->parameters(['kategori' => 'category'])
+            ->names('categories')
+            ->only(['index', 'store', 'edit', 'update', 'destroy']);
+
+        Route::resource('pengguna', AdminUserController::class)
+            ->parameters(['pengguna' => 'user'])
+            ->names('users')
+            ->only(['index', 'create', 'store', 'edit', 'update']);
     });
 
 // Operator
 Route::middleware(['auth', 'role:operator'])
     ->prefix('operator')->name('operator.')
     ->group(function () {
-        Route::view('/dashboard', 'operator.dashboard')->name('dashboard');
+        Route::get('/dashboard', [OperatorTaskController::class, 'index'])->name('dashboard');
+        Route::get('/riwayat', [OperatorTaskController::class, 'history'])->name('history');
+        Route::post('/pesanan/{order:code}/maju', [OperatorTaskController::class, 'advance'])->name('advance');
+        Route::get('/pesanan/{order:code}/desain/{item}', [OperatorTaskController::class, 'design'])->name('design');
+        Route::resource('produk', AdminProductController::class)
+            ->parameters(['produk' => 'product'])
+            ->names('products')
+            ->except('show');
+        Route::post('/produk/{product}/aktif', [AdminProductController::class, 'toggle'])->name('products.toggle');
+
+        Route::resource('kategori', AdminCategoryController::class)
+            ->parameters(['kategori' => 'category'])
+            ->names('categories')
+            ->only(['index', 'store', 'edit', 'update', 'destroy']);
     });
 
 // Owner
 Route::middleware(['auth', 'role:owner'])
     ->prefix('owner')->name('owner.')
     ->group(function () {
-        Route::view('/dashboard', 'owner.dashboard')->name('dashboard');
+        Route::get('/dashboard', OwnerDashboardController::class)->name('dashboard');
+        Route::get('/laporan', [OwnerReportController::class, 'index'])->name('report');
+        Route::get('/laporan/unduh', [OwnerReportController::class, 'export'])->name('report.export');
     });

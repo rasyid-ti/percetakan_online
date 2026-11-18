@@ -47,4 +47,9 @@ class Product extends Model
     {
         return Attribute::get(fn () => 'Rp ' . number_format($this->base_price, 0, ',', '.'));
     }
+
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::get(fn () => $this->image ? asset('storage/' . $this->image) : null);
+    }
 }
