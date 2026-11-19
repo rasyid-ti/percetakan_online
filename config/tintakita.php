@@ -10,4 +10,8 @@ return [
         'number' => '[123456789]',
         'holder' => '[TintaKita Online]',
     ],
+        'qris' => [
+        'image' => 'images/qris.png',
+        'merchant' => 'TintaKita Online',
+    ],
 ];

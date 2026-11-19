@@ -25,7 +25,16 @@ class Order extends Model
             'payment_status' => PaymentStatus::class,
             'deadline' => 'date',
             'completed_at' => 'datetime',
+            'picked_up_at' => 'datetime',
         ];
+    }
+     
+    /** Kode ambil 6 karakter, dihitung dari kode pesanan (tidak perlu disimpan). */
+    protected function pickupCode(): Attribute
+    {
+        return Attribute::get(
+            fn () => strtoupper(substr(hash_hmac('sha256', (string) $this->code, (string) config('app.key')), 0, 6))
+        );
     }
 
     public function user(): BelongsTo

@@ -74,6 +74,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/pesanan/{order:code}/batal', [AdminOrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('/pesanan/{order:code}/desain/{item}', [AdminOrderController::class, 'design'])->name('orders.design');
         Route::get('/pembayaran/{payment}/bukti', [AdminOrderController::class, 'proof'])->name('payments.proof');
+        Route::post('/pesanan/{order:code}/lokasi', [AdminOrderController::class, 'location'])->name('orders.location');
+        Route::post('/pesanan/{order:code}/serah-terima', [AdminOrderController::class, 'handover'])->name('orders.handover');
 
         Route::resource('produk', AdminProductController::class)
             ->parameters(['produk' => 'product'])

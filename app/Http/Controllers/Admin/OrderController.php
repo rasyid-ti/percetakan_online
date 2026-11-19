@@ -199,4 +199,49 @@ class OrderController extends Controller
             'note' => $note,
         ]);
     }
+
+    public function location(Request $request, Order $order): RedirectResponse
+    {
+        $data = $request->validate([
+            'storage_location' => ['nullable', 'string', 'max:60'],
+        ], [
+            'storage_location.max' => 'Lokasi maksimal 60 karakter.',
+        ]);
+
+        $order->storage_location = $data['storage_location'] ?: null;
+        $order->save();
+
+        return back()->with('success', 'Lokasi simpan diperbarui.');
+    }
+
+    public function handover(Request $request, Order $order): RedirectResponse
+    {
+        abort_unless($order->status === OrderStatus::Ready, 403);
+
+        $request->validate([
+            'pickup_code' => ['required', 'string'],
+        ], [
+            'pickup_code.required' => 'Masukkan kode ambil dari pelanggan.',
+        ]);
+
+        $input = strtoupper(trim((string) $request->input('pickup_code')));
+
+        if (! hash_equals($order->pickup_code, $input)) {
+            return back()->withErrors(['pickup_code' => 'Kode ambil tidak cocok. Periksa lagi dengan pelanggan.']);
+        }
+
+        $order->status = OrderStatus::Completed;
+        $order->completed_at = now();
+        $order->picked_up_at = now();
+        $order->save();
+
+        $log = new OrderStatusLog();
+        $log->order_id = $order->id;
+        $log->user_id = $request->user()->id;
+        $log->status = OrderStatus::Completed->value;
+        $log->note = 'Pesanan diserahkan kepada pelanggan.';
+        $log->save();
+
+        return back()->with('success', 'Pesanan diserahkan kepada pelanggan.');
+    }
 }

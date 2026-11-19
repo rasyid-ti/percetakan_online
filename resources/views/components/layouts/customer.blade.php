@@ -45,7 +45,10 @@
         <div class="mb-6 rounded-xl bg-rose-50 px-5 py-3 text-sm font-bold text-rose-800 ring-1 ring-rose-200">{{ session('error') }}</div>
     @endif
     
+    <main class="mx-auto max-w-7xl px-6 py-10 lg:px-12">
+    <x-ready-banner />
     {{ $slot }}
+    </main>
 </main>
 
 </body>

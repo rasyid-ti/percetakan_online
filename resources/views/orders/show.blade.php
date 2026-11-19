@@ -1,10 +1,5 @@
 @php
-    $stepKeys = ['awaiting_payment', 'processing', 'printing', 'finishing', 'ready', 'completed'];
-    $stepLabels = ['Pembayaran', 'Cek File', 'Dicetak', 'Finishing', 'Siap', 'Selesai'];
-    $current = array_search($order->status->value, $stepKeys);
-    $current = $current === false ? 0 : $current;
     $payment = $order->latestPayment;
-    $hasQris = file_exists(public_path('images/qris.png'));
 @endphp
 
 <x-layouts.customer :title="$order->code">
@@ -23,27 +18,21 @@
         </div>
     </div>
 
-    {{-- Progres --}}
-    @if ($order->status !== \App\Enums\OrderStatus::Cancelled)
-        <div class="mt-8 flex flex-wrap gap-y-4 rounded-3xl border border-ink-100 bg-white p-6">
-            @foreach ($stepLabels as $i => $label)
-                <div class="flex min-w-[90px] flex-1 flex-col items-center gap-2 text-center">
-                    <span @class([
-                        'flex h-10 w-10 items-center justify-center rounded-full text-sm font-extrabold',
-                        'bg-brand-600 text-white' => $i < $current,
-                        'bg-ink-900 text-white ring-4 ring-brand-100' => $i === $current,
-                        'bg-ink-100 text-ink-500' => $i > $current,
-                    ])>{{ $i < $current ? '✓' : $i + 1 }}</span>
-                    <span @class(['text-xs font-bold', 'text-ink-900' => $i <= $current, 'text-ink-500' => $i > $current])>{{ $label }}</span>
-                </div>
-            @endforeach
-        </div>
-    @endif
+    {{-- QRIS: tampil paling atas saat belum dibayar --}}
+    <div class="mt-8 empty:hidden">
+        <x-qris-panel :order="$order" />
+    </div>
 
     <div class="mt-8 flex flex-wrap items-start gap-8">
 
-        {{-- Kiri: item dan linimasa --}}
+        {{-- Kiri: pelacak, item, dan linimasa --}}
         <div class="min-w-[300px] flex-[999_1_520px] space-y-8">
+
+            <section class="rounded-3xl border border-ink-100 bg-white p-6">
+                <h2 class="mb-5 text-lg font-extrabold">Status pesanan</h2>
+                <x-order-tracker :order="$order" />
+            </section>
+
             <section class="space-y-4">
                 <h2 class="text-lg font-extrabold">Item pesanan</h2>
                 @foreach ($order->items as $item)
@@ -132,18 +121,10 @@
 
                     <div class="mt-4 space-y-3 text-sm">
                         <div class="rounded-xl bg-ink-50 p-4">
-                            <div class="font-extrabold">Transfer bank</div>
+                            <div class="font-extrabold">Atau transfer bank</div>
                             <div class="mt-1 text-ink-600">{{ config('tintakita.bank.name') }}</div>
                             <div class="text-lg font-extrabold">{{ config('tintakita.bank.number') }}</div>
                             <div class="text-ink-600">a.n. {{ config('tintakita.bank.holder') }}</div>
-                        </div>
-                        <div class="rounded-xl bg-ink-50 p-4">
-                            <div class="font-extrabold">QRIS</div>
-                            @if ($hasQris)
-                                <img src="{{ asset('images/qris.png') }}" alt="Kode QRIS TintaKita" class="mt-2 w-48 rounded-lg">
-                            @else
-                                <div class="mt-1 text-ink-600">Kode QRIS belum dipasang oleh toko.</div>
-                            @endif
                         </div>
                         <div class="font-bold">Jumlah yang harus dibayar: <span class="text-brand-600">{{ $order->total_label }}</span></div>
                     </div>
@@ -153,8 +134,8 @@
                         <div>
                             <label for="method" class="label">Metode pembayaran</label>
                             <select id="method" name="method" class="input">
-                                <option value="transfer" @selected(old('method') === 'transfer')>Transfer bank</option>
                                 <option value="qris" @selected(old('method') === 'qris')>QRIS</option>
+                                <option value="transfer" @selected(old('method') === 'transfer')>Transfer bank</option>
                             </select>
                             @error('method') <p class="error-text">{{ $message }}</p> @enderror
                         </div>

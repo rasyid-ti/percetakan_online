@@ -47,4 +47,57 @@
     .btn-outline {
         @apply inline-flex items-center justify-center rounded-xl border-2 border-ink-200 bg-white px-4 py-2 text-sm font-bold text-ink-900 transition hover:border-ink-900;
     }
+    /* ===== Animasi TintaKita ===== */
+    @keyframes tk-float   { 0%, 100% { translate: 0 0; }    50% { translate: 0 -14px; } }
+    @keyframes tk-float-b { 0%, 100% { translate: 0 0; }    50% { translate: 0 10px; } }
+    @keyframes tk-stripe  { 0%, 100% { translate: 0 0; }    50% { translate: 44px 0; } }
+    @keyframes tk-progress {
+        0%   { width: 6%; }
+        25%  { width: 30%; }
+        50%  { width: 62%; }
+        75%  { width: 88%; }
+        92%, 100% { width: 100%; }
+    }
+    @keyframes tk-badge {
+        0%        { opacity: 0; transform: translateY(6px); }
+        4%, 22%   { opacity: 1; transform: none; }
+        27%, 100% { opacity: 0; transform: translateY(-6px); }
+    }
+    @keyframes tk-step {
+        0%        { color: #5A6F92; }
+        4%, 24%   { color: #0B2A5B; }
+        28%, 100% { color: #5A6F92; }
+    }
+    @keyframes tk-spin { to { transform: rotate(360deg); } }
+    @keyframes tk-pop  { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+
+    .tk-float   { animation: tk-float 5s ease-in-out infinite; }
+    .tk-float-b { animation: tk-float-b 6s ease-in-out infinite; }
+    .tk-stripe  { animation: tk-stripe 7s ease-in-out infinite; }
+    .tk-progress { animation: tk-progress 12s ease-in-out infinite; }
+    .tk-badge { animation: tk-badge 12s ease-in-out infinite both; }
+    .tk-step  { animation: tk-step 12s linear infinite; }
+    .tk-spin  { animation: tk-spin 0.9s linear infinite; }
+    .tk-pop   { animation: tk-pop 0.45s cubic-bezier(.2,.9,.3,1.3) both; }
+
+    /* Animasi muncul saat scroll (masuk dan keluar layar) */
+    .reveal-ready [data-reveal] {
+    opacity: 0;
+    transform: translateY(36px);
+    transition:
+        opacity .7s ease,
+        transform .7s cubic-bezier(.2,.7,.2,1),
+        translate .2s ease,
+        border-color .2s ease;
+    transition-delay: var(--d, 0ms), var(--d, 0ms), 0ms, 0ms;
+    }
+    .reveal-ready [data-reveal="left"]  { transform: translateX(-48px); }
+    .reveal-ready [data-reveal="right"] { transform: translateX(48px); }
+    .reveal-ready [data-reveal="zoom"]  { transform: scale(.92); }
+    .reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tk-float, .tk-float-b, .tk-stripe, .tk-progress, .tk-badge, .tk-step { animation: none; }
+        .tk-badge:first-of-type { opacity: 1; }
+    }
 }

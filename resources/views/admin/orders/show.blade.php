@@ -159,15 +159,62 @@
                 @endif
             </div>
 
+            {{-- Siap diambil / dikirim --}}
+            @if ($order->status === \App\Enums\OrderStatus::Ready)
+                @php
+                    $wa = preg_replace('/\D+/', '', (string) $order->user->phone);
+                    if (str_starts_with($wa, '0')) { $wa = '62' . substr($wa, 1); }
+                    $isPickup = $order->delivery_method !== 'delivery';
+                    $waText = "Halo {$order->user->name}, pesanan {$order->code} sudah siap "
+                        . ($isPickup ? 'diambil' : 'dikirim')
+                        . ($order->storage_location ? ". Lokasi: {$order->storage_location}" : '')
+                        . ($isPickup ? ". Kode ambil: {$order->pickup_code}" : '')
+                        . '. Terima kasih, TintaKita.';
+                @endphp
+
+                <div class="space-y-4 rounded-3xl border-2 border-emerald-500 bg-white p-6">
+                    <h2 class="text-lg font-extrabold">{{ $isPickup ? 'Siap diambil' : 'Siap dikirim' }}</h2>
+
+                    @if ($isPickup)
+                        <form method="POST" action="{{ route('admin.orders.location', $order->code) }}" class="space-y-2">
+                            @csrf
+                            <label for="storage_location" class="label">Lokasi simpan</label>
+                            <input id="storage_location" name="storage_location" type="text" maxlength="60" value="{{ old('storage_location', $order->storage_location) }}" placeholder="Contoh: Rak B-3" class="input">
+                            @error('storage_location') <p class="error-text">{{ $message }}</p> @enderror
+                            <button type="submit" class="btn-primary w-full">Simpan Lokasi</button>
+                        </form>
+                    @endif
+
+                    @if ($wa)
+                        <a href="https://wa.me/{{ $wa }}?text={{ rawurlencode($waText) }}" target="_blank" rel="noopener"
+                           class="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-700">
+                            Kabari via WhatsApp
+                        </a>
+                    @else
+                        <p class="text-xs text-ink-500">Pelanggan belum mengisi nomor telepon, jadi tombol WhatsApp tidak tersedia.</p>
+                    @endif
+                </div>
+            @endif
+
             @if ($isOpen)
                 <div class="space-y-3 rounded-3xl border border-ink-100 bg-white p-6">
                     <h2 class="text-lg font-extrabold">Tindakan</h2>
 
                     @if ($order->status === \App\Enums\OrderStatus::Ready)
-                        <form method="POST" action="{{ route('admin.orders.complete', $order->code) }}">
-                            @csrf
-                            <button type="submit" class="w-full rounded-xl bg-emerald-700 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-800">Tandai Selesai</button>
-                        </form>
+                        @if ($order->delivery_method === 'delivery')
+                            <form method="POST" action="{{ route('admin.orders.complete', $order->code) }}">
+                                @csrf
+                                <button type="submit" class="w-full rounded-xl bg-emerald-700 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-800">Tandai Terkirim</button>
+                            </form>
+                        @else
+                            <form method="POST" action="{{ route('admin.orders.handover', $order->code) }}" class="space-y-2">
+                                @csrf
+                                <label for="pickup_code" class="label">Kode ambil dari pelanggan</label>
+                                <input id="pickup_code" name="pickup_code" type="text" maxlength="6" autocomplete="off" placeholder="6 karakter" class="input text-center text-lg font-extrabold uppercase tracking-[0.3em]">
+                                @error('pickup_code') <p class="error-text">{{ $message }}</p> @enderror
+                                <button type="submit" class="w-full rounded-xl bg-emerald-700 px-6 py-3 text-sm font-bold text-white hover:bg-emerald-800">Serahkan ke Pelanggan</button>
+                            </form>
+                        @endif
                     @endif
 
                     <form method="POST" action="{{ route('admin.orders.cancel', $order->code) }}" onsubmit="return confirm('Yakin membatalkan pesanan ini?')">
